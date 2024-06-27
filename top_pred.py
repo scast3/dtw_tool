@@ -49,7 +49,7 @@ def calc_tops(G, node1, node2):
         if matches.any():
             df1.at[index_df1, 'Present'] = 1
 
-    G.nodes[node1]["topes"] = df1[df1['Present'] == 1] # store the filtered rows near the topes into the graph
+    G.nodes[node1]["is_top"] = df1[df1['Present'] == 1] # store the filtered rows near the topes into the graph
     prof1 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"][0] - 50
     prof2 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"].iloc[-1] + 50
     df1 = df1[(df1['DEPTH'] > prof1) & (df1['DEPTH'] < prof2)].reset_index()
@@ -71,12 +71,12 @@ def calc_tops(G, node1, node2):
     correla = [tupla for tupla in path if tupla[0] in ref.index]
     correla2 = [tupla[1] for tupla in correla]
 
-    #mark tops in df2
-    df2["topes"] = 0
+    # mark tops in df2
+    df2["is_top"] = 0
     for elemento in correla2:
         if elemento in df2.index:
-            df2.loc[elemento, "topes"] = 1
-    G.nodes[node2]["topes"] = df2[df2["topes"] == 1]
+            df2.loc[elemento, "is_top"] = 1
+    G.nodes[node2]["is_top"] = df2[df2["is_top"] == 1]
     G.nodes[node2]["Procesados"] = df2
 
     # create a list of j values for unique i values
@@ -100,4 +100,21 @@ def calc_tops(G, node1, node2):
     capas = ["O4T", "O4T", "O5T", "O5T", "O5aT", "O5aT", "O5bT", "O5bT", "O7T", "O7T", ]
     df_result = pd.concat([df_result, pd.DataFrame(rows_to_add)], ignore_index=True)
     df_result["Capa"] = capas
-    return df_result
+
+    G.nodes[node2]["tops"]=df_result
+    print(G.nodes[node2]["tops"])
+
+
+def dtw_calc(G, node1, node2):
+
+def profiles_comparison(G, node1, node2):
+    for i, j in correla:
+        # Plot the DTW path
+        plt.plot([df1["DEPTH"].iloc[i], df2["DEPTH"].iloc[j]], [df1["RES_DEEP"].iloc[i], df2["RES_DEEP"].iloc[j] + offset], color='red', linestyle='-')
+
+    plt.title(node2 + " " + node1)
+    plt.xlabel('Depth (m)')
+    plt.ylabel('Valor')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
