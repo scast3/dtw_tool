@@ -42,7 +42,7 @@ def calc_tops(G, node1, node2):
 
 
 
-    # mark rows within the tolerance range of any top
+    # mark df1 rows within the tolerance range of any top
     for index_df1, row_df1 in df1.iterrows():
         depth_value = row_df1['DEPTH']
         matches = tops['Ref'].apply(lambda x: np.abs(x - depth_value) <= tolerance)
@@ -101,11 +101,14 @@ def calc_tops(G, node1, node2):
     df_result = pd.concat([df_result, pd.DataFrame(rows_to_add)], ignore_index=True)
     df_result["Capa"] = capas
 
+    # assign new top values to the node
     G.nodes[node2]["tops"]=df_result
     print(G.nodes[node2]["tops"])
 
 
 def dtw_calc(G, node1, node2):
+
+    return df1, df2, correla
 
 def profiles_comparison(G, node1, node2):
     for i, j in correla:
