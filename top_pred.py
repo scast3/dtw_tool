@@ -32,7 +32,7 @@ def custom_distance(p1, p2):
 
 # node 1 is the curernt node
 # node 2 is the node you attempt to move to
-# return: a dataframe with the predicted depths
+# function gets a dataframe with the predicted depths, assigns to "tops" label in node
 def calc_tops(G, node1, node2):
     
     correla, df1, df2 = dtw_calc(G, node1, node2)
@@ -90,10 +90,24 @@ def dtw_calc(G, node1, node2):
     # normalize res deep in df1 and df2
     w1 = np.array(df1['RES_DEEP'].dropna())
     w2 = np.array(df2['RES_DEEP'].dropna())
+    # might need to use normalized values later, not rn tho
+    w1_normalized = normalize_array(w1)
+    w2_normalized = normalize_array(w2)
+
 
     ref = df1[df1["Present"] == 1]
     distance, path = fastdtw(w1, w2, dist=custom_distance)
+    # distance, path = fastdtw(w1_normalized, w2_normalized, dist=custom_distance) Might need to normalize later
     correla = [tupla for tupla in path if tupla[0] in ref.index]
+
+    #mark tops in df2, this block of code is not necessary
+    # correla2 = [tupla[1] for tupla in correla]
+    # df2["is_top"] = 0
+    # for elemento in correla2:
+    #     if elemento in df2.index:
+    #         df2.loc[elemento, "is_top"] = 1
+    # G.nodes[node2]["is_top"] = df2[df2["is_top"] == 1]
+    # G.nodes[node2]["Procesados"] = df2
     
     return correla, df1, df2
 
@@ -120,4 +134,3 @@ def profiles_comparison(G, node1, node2):
     plt.legend()
     plt.grid(True)
     plt.show()
-
