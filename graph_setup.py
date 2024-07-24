@@ -81,8 +81,11 @@ def las_to_node(G, filename, col_name):
     # print(resultado.head(5))
     # print()
 
-
+    # Assigning markers for each node
     G.nodes[node_name]["markers"] = markers[markers["Pozo"]==node_name]
+    G.nodes[node_name]["markers"] = G.nodes[node_name]["markers"].drop("Pozo", axis=1)
+    G.nodes[node_name]["markers"] = G.nodes[node_name]["markers"].rename(columns={"Depth (meters)": "Depth"})
+
 
     G.nodes[node_name]["known_tops"]=tops_vals.copy()
 
@@ -118,10 +121,6 @@ las_to_node(G, las_files[1], "RES_DEEP")
 las_to_node(G, las_files[2], "RES_DEEP")
 
 
-def load_markers(G, node_name):
-    G.nodes[node_name]["markers"] = markers[markers["Pozo"]==node_name]
-
-#%%
 # Function to calculate geodesic distance between two points
 def calculate_distance(lat1, lon1, lat2, lon2):
     return geodesic((lat1, lon1), (lat2, lon2)).meters
@@ -146,5 +145,5 @@ nx.draw(G, pos, with_labels=True, node_size=500, node_color='skyblue', font_size
 labels = nx.get_edge_attributes(G, 'weight')
 nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
 
-plt.title("Grafo Basado en Cordenadas x,y")
+plt.title("Grafo de Pozos")
 plt.show()

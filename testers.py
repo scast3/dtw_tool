@@ -1,9 +1,9 @@
-# Save this as test_calc_functions.py
+
 import unittest
 import pandas as pd
 from calc_functions import profiles_comparison
 from graph_setup import G
-# python -m unittest test_calc_functions.py
+# python -m unittest testers.py
 
 
 class TestCalcFunctions(unittest.TestCase):
