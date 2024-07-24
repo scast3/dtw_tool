@@ -1,10 +1,29 @@
+"""
+Script Name: solve_functions.py
+Description: <Brief description of what the script does>
+
+Author: Santiago Castillo
+Date Created: 
+Last Modified: 
+Version: 1.0
+
+Dependencies:
+    - numpy (pip install numpy)
+    - pandas (pip install pandas)
+    - matplotlib (pip install matplotlib)
+    - lasio (pip install lasio)
+    - os (pip install os)
+    - glob (pip install glob)
+    - geodesic (pip install geodesic)
+    - networkx (pip install networkx)
+
+"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import lasio
 import os
 import glob
-import numpy as np
 from geopy.distance import geodesic
 import networkx as nx
 

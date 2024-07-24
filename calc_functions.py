@@ -1,3 +1,24 @@
+"""
+Script Name: calc_functions.py
+Description: <Brief description of what the script does>
+
+Author: Santiago Castillo
+Date Created: 
+Last Modified: 
+Version: 1.0
+
+Dependencies:
+    - numpy (pip install numpy)
+    - warnings
+    - pandas (pip install pandas)
+    - matplotlib (pip install matplotlib)
+    - fastdtw (pip install fastdtw)
+    - scikit-learn (pip install scikit-learn)
+    - hyperopt (pip install hyperopt)
+    - networkx (pip install networkx)
+
+"""
+
 import warnings
 import numpy as np
 import pandas as pd
@@ -7,6 +28,7 @@ from sklearn.preprocessing import MinMaxScaler
 from hyperopt import fmin, tpe, hp, Trials, STATUS_OK
 import networkx as nx
 
+# ignore warnings, they clutter the output
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
 pd.set_option('display.max_rows', None)
@@ -21,13 +43,38 @@ def normalize_array(arr):
 def custom_distance(p1, p2):
     return np.abs(p1 - p2) **(1/ 4.3)
 
-
-
-# node 1 is the curernt node
-# node 2 is the node you attempt to move to
-# function gets a dataframe with the predicted depths, assigns to "tops" label in node
-# window in the format [start1, end1, start2, end2]
 def calc_tops(G, node1, node2, window = None, show_comparison = False):
+    """
+    Calculates the tops for the given graph nodes based on depth data and assigns the predicted 
+    depths to the "tops" label in the destination node.
+
+    Parameters:
+    G : networkx.Graph
+        The graph containing the nodes with their respective data.
+    node1 : str
+        The name of the current node (source node).
+    node2 : str
+        The name of the node you attempt to move to (destination node).
+    window : list of int, optional
+        A list of four integers defining the window range for filtering depth data in the format 
+        [start1, end1, start2, end2]. Default is None.
+    show_comparison : bool, optional
+        If True, displays comparison plots of the profiles. Default is False.
+
+    Returns:
+    None
+        The function modifies the graph in place by assigning the predicted depths to the "tops" 
+        attribute of the destination node.
+
+    Example:
+    calc_tops(G, 'Node1', 'Node2', window=[1000, 2000, 1500, 2500], show_comparison=True)
+
+    Notes:
+    - Ensure that the graph G has nodes with 'data' and 'known_tops' attributes containing 
+      the respective dataframes.
+    - The function assumes that the 'known_tops' dataframe has a 'Capa' column.
+
+    """
 
     # create a new dataframe that takes the values of node2 where the "capa" value is the same as in node1
     
