@@ -4,17 +4,10 @@ import matplotlib.pyplot as plt
 import lasio
 import os
 import glob
-from dtaidistance import dtw
-from dtaidistance import dtw_visualisation as dtwvis
-import seaborn as sns
-from sklearn.preprocessing import MinMaxScaler
-from fastdtw import fastdtw
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from geopy.distance import geodesic
 import networkx as nx
-import scipy.interpolate
-import time
+
 
 # directory on personal computer
 ruta = os.getcwd()+"/Datos"

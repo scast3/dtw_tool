@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 from fastdtw import fastdtw
 from sklearn.preprocessing import MinMaxScaler
 from hyperopt import fmin, tpe, hp, Trials, STATUS_OK
