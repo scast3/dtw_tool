@@ -3,7 +3,7 @@ Script Name: calc_functions.py
 Description: <Brief description of what the script does>
 
 Author: Santiago Castillo
-Date Created: 
+Date Created: 24/7/2024
 Last Modified: 
 Version: 1.0
 
@@ -84,7 +84,6 @@ def calc_tops(G, node1, node2, window = None, show_comparison = False):
 
     capas = G.nodes[node1]["known_tops"]["Capa"]
 
-    # TODO will need to fix this because it is assigning the wrong tops labels to depths
     if window:
         lower = np.min([window[0], window[2]])
         upper = np.max([window[1], window[3]])
@@ -113,48 +112,6 @@ def calc_tops(G, node1, node2, window = None, show_comparison = False):
     
     # assign new top values to the node
     G.nodes[node2]["tops"]=df_result
-
-def verify(G, node_name, show_plots = False, window = None):
-    if "tops" in G.nodes[node_name]:
-        pred = G.nodes[node_name]["tops"].copy()
-        known = G.nodes[node_name]["known_tops"].copy()
-
-        if window:
-            start1 = window[0]
-            end1 = window[1]
-            known = known[(known["Ref"]>=start1) & (known["Ref"]<=end1)]
-
-        result = pd.DataFrame(columns=["Capa", "known depth", "predicted depth"])
-        result["Capa"] = pred["Capa"]
-        result["known depth"] = known["Ref"]
-        result["predicted depth"] = pred["Ref"]
-        result["abs error"] = np.abs(result['known depth'] - result['predicted depth'])
-
-        print(result)
-
-        if show_plots:
-            
-            plt.figure(figsize=(12, 6))
-            plt.plot(result['predicted depth'], result['abs error'], label='Error Absoluto', color='purple')
-            plt.xlabel('Depth (m)')
-            plt.ylabel('Error Absoluto (m)')
-            plt.title(f'Error Absoluto entre Predicción y Valores Verdaderos en {node_name}')
-            plt.legend()
-            plt.show()
-            
-            # capas side by side plot
-            plt.figure(figsize=(12, 6))
-            plt.scatter(result['predicted depth'], result['Capa'], color='blue', label='Predicción')
-            plt.scatter(result['known depth'], result['Capa'], color='red', label='Verdadero')
-
-            plt.xlabel('Depth (m)')
-            plt.ylabel('Capa')
-            plt.title(f'Evaluación de Capas {node_name}')
-            plt.legend()
-            plt.show()
-
-    else:
-        print("Prediction has not been run yet")
 
 def dtw_calc(df1, df2, tops1):
     tolerance = 0.1 #original 0.05, was too small
@@ -259,6 +216,7 @@ def profiles_comparison(df1, df2, tops1, r=None, vertical = False, name1 = None,
     plt.show()
 
 def raw_data(G, names, r=None):
+
     offset = 50
     colormap = plt.cm.viridis
     num_colors = len(names)
@@ -313,11 +271,13 @@ def windows_test(G, node_name1, node_name2, window, show_plots = False):
 
     real = f_tops2[f_tops2["Capa"].isin(capas)].reset_index(drop=True)
 
-    # handle edge case, clip real so that it has the same number of rows as error_df 
+    # handle edge case, clip real dataframe so that it has the same number of rows as error_df 
     # could encounter errors if dataframes are length 1
     if real.shape[0] != error_df.shape[0]:
         real_capa1 = real.iloc[1]['Capa']
         pred_capa1 = error_df.iloc[1]['Capa']
+
+        # check whether to delete first or last row based on which capa was cut off
         if real_capa1 != pred_capa1:
             real = real.drop(0).reset_index(drop=True)
         else:
@@ -356,8 +316,9 @@ def windows_test(G, node_name1, node_name2, window, show_plots = False):
     return mae, mse
 
 # optimization function to find the best window
+# Source:
+# https://towardsdatascience.com/hyperopt-demystified-3e14006eb6fa
 def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_size = 0.5, num_iter = 50):    
-
 
     def objective(params):
         start1, end1, start2, end2 = params

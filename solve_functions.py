@@ -1,3 +1,18 @@
+"""
+Script Name: solve_functions.py
+Description: Assuming a networkx graph G has the correct node values (resistivity profile) and edges (distance),
+    these functions will traverse the graph to predict values through certain parameters and paths
+
+Author: Santiago Castillo
+Date Created: 24/7/2024
+Last Modified: 
+Version: 1.0
+
+Dependencies:
+    - networkx (pip install networkx)
+
+"""
+
 from calc_functions import optimal_window, calc_tops, windows_test
 import networkx as nx
 

@@ -1,9 +1,9 @@
 """
-Script Name: solve_functions.py
+Script Name: graph_setup.py
 Description: <Brief description of what the script does>
 
 Author: Santiago Castillo
-Date Created: 
+Date Created: 24/7/2024
 Last Modified: 
 Version: 1.0
 
