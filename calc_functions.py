@@ -354,4 +354,3 @@ def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_s
 
 def clear_tops(G, node_name):
     G.nodes[node_name]["tops"] = pd.DataFrame()
-
