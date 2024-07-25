@@ -146,4 +146,4 @@ labels = nx.get_edge_attributes(G, 'weight')
 nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
 
 plt.title("Grafo de Pozos")
-plt.show()
+#plt.show()
