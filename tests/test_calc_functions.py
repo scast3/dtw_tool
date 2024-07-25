@@ -6,9 +6,19 @@ from graph_setup import G
 def test_calc_tops_1():
     n1 = "PVH-941"
     n2 = "PVH-937"
-    calc_tops(G, n1, n2, [0, 1, 0, 1])
+    calc_tops(G, n1, n2)
     assert "tops" in G.nodes[n2], "The key 'tops' does not exist in the node"
     assert not G.nodes[n2]["tops"].empty, "The DataFrame is empty"
+
+def test_calc_tops_2():
+    # test for a small window where no matches will be found
+    n1 = "PVH-941"
+    n2 = "PVH-937"
+    calc_tops(G, n1, n2, window=[0,1,0,1])
+    assert "tops" in G.nodes[n2], "The key 'tops' does not exist in the node"
+    assert not G.nodes[n2]["tops"].empty, "The DataFrame is empty"
+
+
 
 if __name__ == "__main__":
     pytest.main()
