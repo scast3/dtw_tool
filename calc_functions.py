@@ -348,12 +348,18 @@ def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_s
 
     # make sure bounds are reasonable, the bounds should not exceed the min and max data values
     bounds = [
-        (max(bounds[0][0], zero1), min(bounds[0][1], inf1)),
-        (max(bounds[1][0], zero1), min(bounds[1][1], inf1)),
-        (max(bounds[2][0], zero2), min(bounds[2][1], inf2)),
-        (max(bounds[3][0], zero2), min(bounds[3][1], inf2))
+        (max(bounds[0][0], zero1), max(bounds[0][1], zero1)),
+        (min(bounds[1][0], inf1), min(bounds[1][1], inf1)),
+        (max(bounds[2][0], zero2), max(bounds[2][1], zero2)),
+        (min(bounds[3][0], inf2), min(bounds[3][1], inf2))
     ]
-    
+
+    # handling if a bounds tuple has the same value
+    small_tol = 1
+    for i in range(len(bounds)):
+        if bounds[i][0] == bounds[i][1]:
+            bounds[i] = (bounds[i][0]-small_tol, bounds[i][1]+small_tol)
+            
     # bounds
     space = [
         hp.quniform('start1', bounds[0][0], bounds[0][1], step_size),
