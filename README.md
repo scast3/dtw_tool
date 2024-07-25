@@ -28,3 +28,19 @@ You can install the required packages using `pip`:
 ```bash
 pip install networkx numpy pandas matplotlib fastdtw scikit-learn hyperopt
 ```
+
+## Author Information
+
+Santiago Castillo
+
+sacastillo2025@gmail.com
+
+[linkedin](https://www.linkedin.com/in/santiagoalejandro-castillo/)
+
+## Acknowledgments
+
+This project took inspiration from existing work:
+
+- [Wheeler Hale 2015 - Colorado School of Mines](https://repository.mines.edu/handle/11124/17145?show=full)
+- [DTW well alignment - implementation of Wheeler Hale](https://github.com/ar4/wheeler_hale_2015)
+- [Hyperopt optimization](https://hyperopt.github.io/hyperopt/)
