@@ -327,7 +327,11 @@ def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_s
         if start1 >= end1 or start2 >= end2:
             return {'loss': float('inf'), 'status': STATUS_OK}  # Invalid window, return a large value
 
-        mae, mse = windows_test(G, node_name1, node_name2, win)
+        try:
+            mae, mse = windows_test(G, node_name1, node_name2, [start1, end1, start2, end2])
+        except (ValueError, IndexError) as e:
+            # Return a large value if an error occurs
+            return {'loss': float('inf'), 'status': STATUS_OK}
 
         if returnType == "mse":
             return {'loss': mse, 'status': STATUS_OK}
@@ -335,7 +339,21 @@ def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_s
         elif returnType == "mae":
             return {'loss': mae, 'status': STATUS_OK}
     
+    # get first and last values of data
+    zero1 = G.nodes[node_name1]["data"]["DEPTH"].iloc[0]
+    inf1 = G.nodes[node_name1]["data"]["DEPTH"].iloc[-1]
+    zero2 = G.nodes[node_name2]["data"]["DEPTH"].iloc[0]
+    inf2 = G.nodes[node_name2]["data"]["DEPTH"].iloc[-1]
 
+
+    # make sure bounds are reasonable, the bounds should not exceed the min and max data values
+    bounds = [
+        (max(bounds[0][0], zero1), min(bounds[0][1], inf1)),
+        (max(bounds[1][0], zero1), min(bounds[1][1], inf1)),
+        (max(bounds[2][0], zero2), min(bounds[2][1], inf2)),
+        (max(bounds[3][0], zero2), min(bounds[3][1], inf2))
+    ]
+    
     # bounds
     space = [
         hp.quniform('start1', bounds[0][0], bounds[0][1], step_size),
@@ -363,3 +381,4 @@ def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_s
 
 def clear_tops(G, node_name):
     G.nodes[node_name]["tops"] = pd.DataFrame()
+
