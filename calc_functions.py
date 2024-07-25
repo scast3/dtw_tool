@@ -133,6 +133,7 @@ def dtw_calc(df1, df2, tops1):
             
 
     # store the filtered rows near the caps into the graph
+    # Need to handle there being no matches present (for very small window), returntype must account for this
     prof1 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"][0] - 50
     prof2 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"].iloc[-1] + 50
     df1 = df1[(df1['DEPTH'] > prof1) & (df1['DEPTH'] < prof2)].reset_index()
