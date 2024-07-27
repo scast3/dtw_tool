@@ -1,6 +1,4 @@
 import pandas as pd
-from graph_setup import G
-import numpy as np
 from calc_functions import optimal_window
 
 def create_subs(arr):
@@ -74,5 +72,3 @@ def mkr_calc_window(G, node_name1, node_name2, show_plot = False):
 
     return mkr_df
 
-marker_ranges = mkr_calc_window(G, "PVH-937", "PVH-941")
-print(marker_ranges)
