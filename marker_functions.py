@@ -14,7 +14,7 @@ def create_subs(arr):
     
     return result
 
-def mkr_calc_window(G, node_name1, node_name2, show_plot = False):
+def mkr_calc_window(G, node_name1, node_name2, show_ranges = False, show_error = False):
     mkr_df = pd.DataFrame(columns=["Label", f"Range {node_name1}", f"Range {node_name2}", 
                                    f"Opt Win {node_name1}", f"Opt Win {node_name2}", "Error"])
 
@@ -67,8 +67,11 @@ def mkr_calc_window(G, node_name1, node_name2, show_plot = False):
         mkr_df.at[i, f"Opt Win {node_name2}"] = (opt[2],opt[3])
 
 
-    if show_plot:
+    if show_ranges:
         print("lol!")
+
+    if show_error:
+        print("err")
 
     return mkr_df
 
