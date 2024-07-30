@@ -216,9 +216,8 @@ def profiles_comparison(df1, df2, tops1, r=None, vertical = False, name1 = None,
     plt.gca().invert_yaxis()
     plt.show()
 
-def raw_data(G, names, r=None):
+def raw_data(G, names, r=None, offset = 50):
 
-    offset = 50
     colormap = plt.cm.viridis
     num_colors = len(names)
     colors = [colormap(i) for i in np.linspace(0, 1, num_colors)]
@@ -232,7 +231,6 @@ def raw_data(G, names, r=None):
 
     plt.title(f"Raw Resistivity Data")
     plt.xlabel('Valor')
-    plt.xlim(0,500)
 
     if r:
         plt.ylim(r[0], r[1])
