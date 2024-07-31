@@ -130,12 +130,17 @@ def dtw_calc(df1, df2, tops1):
             # If tops1 is empty, break the loop
             if tops1.empty:
                 break
-            
-
-    # store the filtered rows near the caps into the graph
+    
     # Need to handle there being no matches present (for very small window), returntype must account for this
+    if 'Present' not in df1.columns:
+        return [], df1, df2
+    
+    # store the filtered rows near the caps into the graph
+    
     prof1 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"][0] - 50
     prof2 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"].iloc[-1] + 50
+
+
     df1 = df1[(df1['DEPTH'] > prof1) & (df1['DEPTH'] < prof2)].reset_index()
     df2 = df2[(df2['DEPTH'] > prof1) & (df2['DEPTH'] < prof2)].reset_index()
 
