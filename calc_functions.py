@@ -133,6 +133,7 @@ def dtw_calc(df1, df2, tops1):
     
     # Need to handle there being no matches present (for very small window), returntype must account for this
     if 'Present' not in df1.columns:
+        print(f"No tops found in the dataset")
         return [], df1, df2
     
     # store the filtered rows near the caps into the graph
