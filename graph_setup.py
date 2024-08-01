@@ -1,6 +1,6 @@
 """
 Script Name: graph_setup.py
-Description: <Brief description of what the script does>
+Description: Creando los nodos y enlaces del grafo G
 
 Author: Santiago Castillo
 Date Created: 24/7/2024
@@ -28,9 +28,8 @@ from geopy.distance import geodesic
 import networkx as nx
 
 
-# directory on personal computer
+# directorio
 ruta = os.getcwd()+"/Datos"
-#os.chdir(ruta)
 
 ruta_logs = ruta + "/Datos VH_III"
 ruta_archivo = ruta_logs +"/Datos VH_III.xlsx"
@@ -48,6 +47,30 @@ well_data = pd.read_excel(ruta_archivo)
 markers = pd.read_excel(markers_file)
 
 def las_to_node(G, filename, col_name):
+    """
+    Convierte un archivo .las que contiene un perfil en un nodo del grafo G.
+
+    Parámetros:
+    G : networkx.Graph
+        El grafo al que se añadirá el nodo.
+    filename : str
+        El nombre del archivo .las que contiene los datos del perfil.
+    col_name : str
+        El nombre de la columna que contiene los datos de resistividad.
+
+    Retorna:
+    None
+        La función modifica el grafo G añadiendo un nuevo nodo con los datos del archivo .las.
+
+    Ejemplo:
+    las_to_node(G, perfil.las, "HT90")
+
+    Notas:
+    - Asegúrese de que el archivo .las contenga una columna de profundidad 'DEPTH' y una columna con los datos 
+      de resistividad especificada por 'col_name'.
+    - El archivo de tops debe estar en formato Excel y debe tener una hoja con el nombre del pozo/nodo.
+    """
+
     node_name = os.path.splitext(os.path.basename(filename))[0]
     las = lasio.read(filename)
     las_df = las.df().dropna()
@@ -77,9 +100,6 @@ def las_to_node(G, filename, col_name):
 
     tops_vals = resultado.sort_values(by='Ref', ascending=True).reset_index().dropna()
 
-    # print(f"Resultados {node_name}")
-    # print(resultado.head(5))
-    # print()
 
     # Assigning markers for each node
     G.nodes[node_name]["markers"] = markers[markers["Pozo"]==node_name]
@@ -89,6 +109,7 @@ def las_to_node(G, filename, col_name):
 
     G.nodes[node_name]["known_tops"]=tops_vals.copy()
 
+# lo mismo pero para .log files
 # TODO finish this, .log files currently do not work
 def log_to_node(G, filename, col_name):
     log_data = []
@@ -112,7 +133,10 @@ las_to_node(G, las_files[0], "HT90")
 las_to_node(G, las_files[1], "HT90")
 las_to_node(G, las_files[2], "HDRS")
 
-#log_to_node(G, log_files[0], "M2R9")
+
+
+# Cambiar el directorio para crear el grafo G
+
 ruta_logs = ruta + "/Perfiles_3"
 las_files = glob.glob(os.path.join(ruta_logs, '*.las'))
 
