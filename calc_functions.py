@@ -1,10 +1,11 @@
 """
 Script Name: calc_functions.py
-Description: <Brief description of what the script does>
+Description: Contiene funciones de cálculo que se usan regularmente en el código. Esto incluye funciones de DTW, 
+de encontrar ventanas, de encontrar capas, etc
 
 Author: Santiago Castillo
 Date Created: 24/7/2024
-Last Modified: 
+Last Modified: 1/8/2024
 Version: 1.0
 
 Dependencies:
@@ -45,35 +46,34 @@ def custom_distance(p1, p2):
 
 def calc_tops(G, node1, node2, window = None, show_comparison = False):
     """
-    Calculates the tops for the given graph nodes based on depth data and assigns the predicted 
-    depths to the "tops" label in the destination node.
+    Calcula los tops para los nodos del gráfico dados en función de los datos de profundidad y 
+    asigna las profundidades predichas a la etiqueta "tops" en el nodo de destino.
 
-    Parameters:
+    Parámetros:
     G : networkx.Graph
-        The graph containing the nodes with their respective data.
+        El gráfico que contiene los nodos con sus respectivos datos.
     node1 : str
-        The name of the current node (source node).
+        El nombre del nodo actual (nodo de origen).
     node2 : str
-        The name of the node you attempt to move to (destination node).
-    window : list of int, optional
-        A list of four integers defining the window range for filtering depth data in the format 
-        [start1, end1, start2, end2]. Default is None.
-    show_comparison : bool, optional
-        If True, displays comparison plots of the profiles. Default is False.
+        El nombre del nodo al que se intenta mover (nodo de destino).
+    window : lista de int, opcional
+        Una lista de cuatro enteros que define el rango de ventana para filtrar datos de profundidad 
+        en el formato [start1, end1, start2, end2]. Por defecto es None.
+    show_comparison : bool, opcional
+        Si es True, muestra gráficos de comparación de los perfiles. Por defecto es False.
 
-    Returns:
+    Retorna:
     None
-        The function modifies the graph in place by assigning the predicted depths to the "tops" 
-        attribute of the destination node.
+        La función modifica el gráfico en su lugar asignando las profundidades predichas al atributo 
+        "tops" del nodo de destino.
 
-    Example:
+    Ejemplo:
     calc_tops(G, 'Node1', 'Node2', window=[1000, 2000, 1500, 2500], show_comparison=True)
 
-    Notes:
-    - Ensure that the graph G has nodes with 'data' and 'known_tops' attributes containing 
-      the respective dataframes.
-    - The function assumes that the 'known_tops' dataframe has a 'Capa' column.
-
+    Notas:
+    - Asegúrese de que el gráfico G tenga nodos con los atributos 'data' y 'known_tops' que contengan 
+      los respectivos dataframes.
+    - La función asume que el dataframe 'known_tops' tiene una columna 'Capa'.
     """
 
     # create a new dataframe that takes the values of node2 where the "capa" value is the same as in node1
@@ -114,6 +114,36 @@ def calc_tops(G, node1, node2, window = None, show_comparison = False):
     G.nodes[node2]["tops"]=df_result
 
 def dtw_calc(df1, df2, tops1):
+    """
+    Calcula la distancia de DTW entre dos conjuntos de datos de 
+    profundidad y resistividad, filtrando los datos cerca de los tops y normalizando las 
+    resistividades profundas para realizar la comparación.
+
+    Parámetros:
+    df1 : pandas.DataFrame
+        El primer dataframe que contiene los datos de profundidad y resistividad del pozo 1 (pozo de referencia).
+    df2 : pandas.DataFrame
+        El segundo dataframe que contiene los datos de profundidad y resistividad del pozo 2 (pozo con profundidades de tops desconocidas).
+    tops1 : pandas.DataFrame
+        Dataframe que contiene los tops de referencia del pozo 1 con los cuales se compararán los datos de profundidad.
+
+    Retorna:
+    correla : lista de tuplas
+        Lista de tuplas con los índices de las correspondencias calculadas entre los conjuntos de datos normalizados.
+    df1 : pandas.DataFrame
+        El primer dataframe filtrado según los rangos de los tops.
+    df2 : pandas.DataFrame
+        El segundo dataframe filtrado según los rangos de los tops.
+
+    Notas:
+    - La función utiliza una tolerancia para encontrar coincidencias cercanas a los tops de referencia.
+    - Normaliza las resistividades profundas antes de calcular la distancia DTW.
+    - Filtra las filas de los dataframes dentro de un rango de 50 unidades alrededor de las coincidencias encontradas.
+
+    Ejemplo:
+    correla, filtered_df1, filtered_df2 = dtw_calc(df1, df2, tops1)
+    """
+
     tolerance = 0.1 #original 0.05, was too small
 
     # mark rows within the tolerance range of any top
@@ -141,10 +171,9 @@ def dtw_calc(df1, df2, tops1):
     prof1 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"][0] - 50
     prof2 = df1[df1['Present'] == 1]["DEPTH"].reset_index()["DEPTH"].iloc[-1] + 50
 
-
+    # filter dataframes according to min and max values
     df1 = df1[(df1['DEPTH'] > prof1) & (df1['DEPTH'] < prof2)].reset_index()
     df2 = df2[(df2['DEPTH'] > prof1) & (df2['DEPTH'] < prof2)].reset_index()
-
 
     # normalize res deep in df1 and df2
     w1 = np.array(df1['RES_DEEP'].dropna())
@@ -154,14 +183,38 @@ def dtw_calc(df1, df2, tops1):
     w1_normalized = normalize_array(w1)
     w2_normalized = normalize_array(w2)
 
-
     ref = df1[df1["Present"] == 1]
-    distance, path = fastdtw(w1_normalized, w2_normalized, dist=custom_distance)
+    distance, path = fastdtw(w1_normalized, w2_normalized, dist=custom_distance) # may want to change custom distance
     correla = [tupla for tupla in path if tupla[0] in ref.index]
 
     return correla, df1, df2
 
 def predict(df1, df2, tops1):
+    """
+    Predice las profundidades de referencia en df2 basándose en el DTW con df1,
+    utilizando los tops de referencia proporcionados.
+
+    Parámetros:
+    df1 : pandas.DataFrame
+        El primer dataframe que contiene los datos de profundidad y resistividad.
+    df2 : pandas.DataFrame
+        El segundo dataframe que contiene los datos de profundidad y resistividad.
+    tops1 : pandas.DataFrame
+        Dataframe que contiene los tops de referencia con los cuales se compararán los datos de profundidad.
+
+    Retorna:
+    df_result : pandas.DataFrame
+        Dataframe con las profundidades de referencia predichas en df2.
+
+    Notas:
+    - La función utiliza la función dtw_calc para calcular la alineación entre los conjuntos de datos.
+    - Realiza un promedio de las profundidades alineadas para obtener una relación 1 a 1 entre las profundidades 
+      en df1 y df2.
+
+    Ejemplo:
+    df_result = predict(df1, df2, tops1)
+    """
+
     correla, df1, df2 = dtw_calc(df1, df2, tops1)
     
     df_result = pd.DataFrame(columns=["Capa",'Ref'])
