@@ -1,4 +1,4 @@
-# Pan American Energy Alineamiento de Pozos
+# Pan American Energy Alineamiento de Pozos - Pasantia 2024
 
 ## Descripción
 
@@ -11,7 +11,7 @@ Este proyecto tiene como objetivo comparar y analizar perfiles de resistividad d
 - **marker_functions.py**: Contiene funciones relacionadas con la manipulación y análisis de marcadores en los pozos.
 - **solve_functions.py**: Contiene funciones para recorrer el grafo
 - **data/**: Directorio donde se almacenan los datos de entrada (perfiles de resistividad, marcadores, etc.).
-- **olde notebooks/**: Directorio donde se almacenan los primeros scripts que ya no se usan.
+- **old notebooks/**: Directorio donde se almacenan los primeros scripts que ya no se usan.
 - **window_optimization.ipynb**: Encuentra la ventana optima del grafo y la usa en otros nodos.
 - **markers_optimization.ipynb**: Crea subgrafos basados en los marcadores y corre el algoritmo.
 

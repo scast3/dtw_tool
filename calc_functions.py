@@ -144,7 +144,7 @@ def dtw_calc(df1, df2, tops1):
     correla, filtered_df1, filtered_df2 = dtw_calc(df1, df2, tops1)
     """
 
-    tolerance = 0.1 #original 0.05, was too small
+    tolerance = 0.1 # original 0.05, was too small, if no matches are found, need to change this
 
     # mark rows within the tolerance range of any top
     
@@ -246,6 +246,38 @@ def predict(df1, df2, tops1):
     return df_result
 
 def profiles_comparison(df1, df2, tops1, r=None, vertical = False, name1 = None, name2 = None):
+    
+    """
+    Compara los perfiles de profundidad de dos conjuntos de datos utilizando DTW,
+    y muestra un gráfico comparativo con las líneas de alineación.
+
+    Parámetros:
+    df1 : pandas.DataFrame
+        El primer dataframe que contiene los datos de profundidad y resistividad.
+    df2 : pandas.DataFrame
+        El segundo dataframe que contiene los datos de profundidad y resistividad.
+    tops1 : pandas.DataFrame
+        Dataframe que contiene los tops de referencia con los cuales se compararán los datos de profundidad.
+    r : tuple, optional
+        Tupla que define el rango de profundidades a mostrar en el gráfico (mínimo, máximo). Default es None.
+    vertical : bool, optional
+        Si es True, muestra el gráfico en orientación vertical. Default es False. Esto aún no se ha implementado
+    name1 : str, optional
+        Nombre del primer conjunto de datos para la leyenda del gráfico. Default es None.
+    name2 : str, optional
+        Nombre del segundo conjunto de datos para la leyenda del gráfico. Default es None.
+
+    Retorna:
+    None
+        La función muestra un gráfico comparativo de los perfiles de profundidad.
+
+    Notas:
+    - La función utiliza la función dtw_calc para calcular la alineación entre los conjuntos de datos.
+    - Agrega un desplazamiento (offset) al segundo conjunto de datos para diferenciar visualmente las dos líneas de perfil.
+
+    Ejemplo:
+    profiles_comparison(df1, df2, tops1, r=(1000, 2000), vertical=True, name1="PVH-937", name2="PVH-941")
+    """
 
     correla, df1, df2 = dtw_calc(df1, df2, tops1)
 
@@ -276,6 +308,30 @@ def profiles_comparison(df1, df2, tops1, r=None, vertical = False, name1 = None,
     plt.show()
 
 def raw_data(G, names, r=None, offset = 50):
+    """
+    Muestra los perfiles de resistividad de los nodos especificados.
+
+    Parámetros:
+    G : networkx.Graph
+        El gráfico que contiene los nodos con sus respectivos datos.
+    names : list of str
+        Lista con los nombres de los nodos cuyos datos se desean graficar.
+    r : tuple, optional
+        Tupla que define el rango de profundidades a mostrar en el gráfico (mínimo, máximo). Default es None.
+    offset : int, optional
+        Valor de desplazamiento para separar visualmente las curvas de resistividad en el gráfico. Default es 50.
+
+    Retorna:
+    None
+        La función muestra un gráfico de los datos de resistividad sin procesar.
+
+    Notas:
+    - Cada nodo en el gráfico debe contener un atributo 'data' que sea un DataFrame con columnas 'RES_DEEP' y 'DEPTH'.
+    - El color de las líneas se selecciona automáticamente de un colormap para diferenciar visualmente cada nodo.
+
+    Ejemplo:
+    raw_data(G, ["Node1", "Node2", "Node3"], r=(1000, 2000), offset=50)
+    """
 
     colormap = plt.cm.viridis
     num_colors = len(names)
@@ -300,6 +356,38 @@ def raw_data(G, names, r=None, offset = 50):
     plt.show()
 
 def windows_test(G, node_name1, node_name2, window, show_plots = False):
+    
+    """
+    Calcula las capas para los nodos del grafo dados basándose en la ventana y retorna el error.
+
+    Parámetros:
+    G : networkx.Graph
+        El grafo que contiene los nodos con sus respectivos datos.
+    node_name1 : str
+        El nombre del nodo actual (nodo fuente).
+    node_name2 : str
+        El nombre del nodo al que se intenta mover (nodo destino).
+    window : list of int
+        Una lista de cuatro enteros que definen el rango de la ventana para filtrar datos de profundidad 
+        en el formato [start1, end1, start2, end2].
+    show_plots : bool, opcional
+        Si es True, muestra gráficos de comparación de perfiles y errores. Default es False.
+
+    Retorna:
+    mae : float
+        El error absoluto medio entre las capas predichas y las reales.
+    mse : float
+        El error cuadrático medio entre las capas predichas y las reales.
+
+    Ejemplo:
+    mae, mse = calc_tops(G, 'Node1', 'Node2', window=[1000, 2000, 1500, 2500], show_plots=True)
+
+    Notas:
+    - Asegúrese de que el grafo G tenga nodos con atributos 'data' y 'known_tops' que contengan 
+      los respectivos dataframes.
+    - La función asume que el dataframe 'known_tops' tiene una columna 'Capa'.
+    """
+
     start1 = window[0]
     end1 = window[1]
     start2 = window[2]
@@ -377,7 +465,47 @@ def windows_test(G, node_name1, node_name2, window, show_plots = False):
 # Source:
 # https://towardsdatascience.com/hyperopt-demystified-3e14006eb6fa
 def optimal_window(G, node_name1, node_name2, bounds, returnType = "mae", step_size = 0.5, num_iter = 50):    
+    """
+    Función de optimización para encontrar la mejor ventana.
 
+    Fuente:
+    https://towardsdatascience.com/hyperopt-demystified-3e14006eb6fa
+
+    Parámetros:
+    G : networkx.Graph
+        El grafo que contiene los nodos con sus respectivos datos.
+    node_name1 : str
+        El nombre del nodo actual (nodo fuente).
+    node_name2 : str
+        El nombre del nodo al que se intenta mover (nodo destino).
+    bounds : lista de tuplas
+        Una lista de cuatro tuplas que definen los límites de la ventana en el formato 
+        [(start1_min, start1_max), (end1_min, end1_max), (start2_min, start2_max), (end2_min, end2_max)].
+    returnType : str, opcional
+        El tipo de error que se va a minimizar. Puede ser "mae" para el error absoluto medio 
+        o "mse" para el error cuadrático medio. Default es "mae".
+    step_size : float, opcional
+        El tamaño del paso para la optimización. Default es 0.5.
+    num_iter : int, opcional
+        El número de iteraciones para la optimización. Default es 50.
+
+    Retorna:
+    optimal_windows : list
+        La ventana óptima encontrada en el formato [start1, end1, start2, end2].
+    min_err : float
+        El error mínimo obtenido con la ventana óptima, puede ser mae o mse.
+
+    Ejemplo:
+    optimal_windows, min_err = optimal_window(G, 'Node1', 'Node2', 
+                                              [(0, 1000), (1000, 2000), (0, 1500), (1500, 2500)],
+                                              returnType="mae", step_size=0.5, num_iter=50)
+
+    Notas:
+    - Asegúrese de que el grafo G tenga nodos con atributos 'data' que contengan 
+      los respectivos dataframes.
+    - La función asume que los dataframes de profundidad tienen una columna 'DEPTH'.
+    """
+    
     def objective(params):
         start1, end1, start2, end2 = params
         win = [start1, end1, start2, end2]
